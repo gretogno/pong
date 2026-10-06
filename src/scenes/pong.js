@@ -27,27 +27,21 @@ let img_racchetta;
 let img_pallina;
 
 function preload(s) {
-    // Caricamento degli asset grafici dalla cartella assets/images
     img_sfondo = PP.assets.image.load(s, "assets/images/sfondo.png");
     img_racchetta = PP.assets.image.load(s, "assets/images/racchetta.png");
     img_pallina = PP.assets.image.load(s, "assets/images/pallina.png");
 }
 
 function create(s) {
-    // Aggiunta dello sfondo (pivot in alto a sinistra: 0, 0)
     PP.assets.image.add(s, img_sfondo, 0, 0, 0, 0);
 
-    // Racchetta sinistra (con pivot al centro: 0.5, 0.5)
     racchetta_sx = PP.assets.image.add(s, img_racchetta, MARGINE, ALTEZZA / 2, 0.5, 0.5);
     
-    // Racchetta destra (specchiata orizzontalmente con flip_x)
     racchetta_dx = PP.assets.image.add(s, img_racchetta, LARGHEZZA - MARGINE, ALTEZZA / 2, 0.5, 0.5);
     racchetta_dx.geometry.flip_x = true;
     
-    // Pallina al centro del campo
     pallina = PP.assets.image.add(s, img_pallina, LARGHEZZA / 2, ALTEZZA / 2, 0.5, 0.5);
 
-    // Testo del punteggio in alto
     testo_punti = PP.shapes.text_styled_add(s,
         LARGHEZZA / 2, 30, "00", 48, "Arial",
         "bold", BIANCO, null, 0.5, 0);
@@ -119,16 +113,16 @@ function controlla_punto() {
 }
 
 function update(s) {
-    // Gestione della pausa con il tasto P
     if (PP.interactive.kb.is_key_just_down(s, TASTO_PAUSA)) {
         in_pausa = !in_pausa;
         if (in_pausa) {
             PP.shapes.text_change(testo_punti, "pausa");
+            return;
         }
     }
 
     if (in_pausa) {
-        return; // Salta il resto dell'update se siamo in pausa
+        return;
     }
 
     muovi_racchetta(s, racchetta_sx, TASTO_SU_SX, TASTO_GIU_SX);
@@ -137,7 +131,8 @@ function update(s) {
     muovi_pallina();
     controlla_punto();
     
-    PP.shapes.text_change(testo_punti, punti_sx + " " + punti_dx);
+    // Ripristina il formato del punteggio con il trattino tra i punti
+    PP.shapes.text_change(testo_punti, punti_sx + " - " + punti_dx);
 }
 
 function destroy(s) {
