@@ -9,6 +9,7 @@ const TASTO_SU_SX = PP.key_codes.W;
 const TASTO_GIU_SX = PP.key_codes.S;
 const TASTO_SU_DX = PP.key_codes.UP;
 const TASTO_GIU_DX = PP.key_codes.DOWN;
+const TASTO_PAUSA = PP.key_codes.P;
 
 let racchetta_sx;
 let racchetta_dx;
@@ -19,20 +20,34 @@ let vel_y = 4;
 let punti_sx = 0;
 let punti_dx = 0;
 let testo_punti;
+let in_pausa = false;
+
+let img_sfondo;
+let img_racchetta;
+let img_pallina;
 
 function preload(s) {
+    // Caricamento degli asset grafici dalla cartella assets/images
+    img_sfondo = PP.assets.image.load(s, "assets/images/sfondo.png");
+    img_racchetta = PP.assets.image.load(s, "assets/images/racchetta.png");
+    img_pallina = PP.assets.image.load(s, "assets/images/pallina.png");
 }
 
 function create(s) {
-    racchetta_sx = PP.shapes.rectangle_add(s, MARGINE, ALTEZZA / 2,
-        L_RACCHETTA, A_RACCHETTA, BIANCO, 1);
-        
-    racchetta_dx = PP.shapes.rectangle_add(s, LARGHEZZA - MARGINE, ALTEZZA / 2,
-        L_RACCHETTA, A_RACCHETTA, BIANCO, 1);
-        
-    pallina = PP.shapes.rectangle_add(s, LARGHEZZA / 2, ALTEZZA / 2,
-        L_PALLINA, L_PALLINA, BIANCO, 1);
+    // Aggiunta dello sfondo (pivot in alto a sinistra: 0, 0)
+    PP.assets.image.add(s, img_sfondo, 0, 0, 0, 0);
 
+    // Racchetta sinistra (con pivot al centro: 0.5, 0.5)
+    racchetta_sx = PP.assets.image.add(s, img_racchetta, MARGINE, ALTEZZA / 2, 0.5, 0.5);
+    
+    // Racchetta destra (specchiata orizzontalmente con flip_x)
+    racchetta_dx = PP.assets.image.add(s, img_racchetta, LARGHEZZA - MARGINE, ALTEZZA / 2, 0.5, 0.5);
+    racchetta_dx.geometry.flip_x = true;
+    
+    // Pallina al centro del campo
+    pallina = PP.assets.image.add(s, img_pallina, LARGHEZZA / 2, ALTEZZA / 2, 0.5, 0.5);
+
+    // Testo del punteggio in alto
     testo_punti = PP.shapes.text_styled_add(s,
         LARGHEZZA / 2, 30, "00", 48, "Arial",
         "bold", BIANCO, null, 0.5, 0);
@@ -104,6 +119,18 @@ function controlla_punto() {
 }
 
 function update(s) {
+    // Gestione della pausa con il tasto P
+    if (PP.interactive.kb.is_key_just_down(s, TASTO_PAUSA)) {
+        in_pausa = !in_pausa;
+        if (in_pausa) {
+            PP.shapes.text_change(testo_punti, "pausa");
+        }
+    }
+
+    if (in_pausa) {
+        return; // Salta il resto dell'update se siamo in pausa
+    }
+
     muovi_racchetta(s, racchetta_sx, TASTO_SU_SX, TASTO_GIU_SX);
     muovi_racchetta(s, racchetta_dx, TASTO_SU_DX, TASTO_GIU_DX);
     
